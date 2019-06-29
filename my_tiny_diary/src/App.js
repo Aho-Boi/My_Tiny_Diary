@@ -26,7 +26,10 @@ function App() {
 export default App;*/
 
 import React from 'react';
-import deburr from 'lodash/deburr';
+import firebase from 'firebase';
+import 'firebase/auth';
+import 'firebase/firestore';
+/*import deburr from 'lodash/deburr';
 import Autosuggest from 'react-autosuggest';
 import match from 'autosuggest-highlight/match';
 import parse from 'autosuggest-highlight/parse';
@@ -34,189 +37,136 @@ import TextField from '@material-ui/core/TextField';
 import Paper from '@material-ui/core/Paper';
 import MenuItem from '@material-ui/core/MenuItem';
 import Popper from '@material-ui/core/Popper';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';*/
+import {DB_CONFIG} from "./config_db";
 
-const suggestions = []
+class App extends React.Component{
+    constructor(props){
+        super(props);
+        Firebase.initializeApp(DB_CONFIG.firebase);
 
-function renderInputComponent(inputProps) {
-  const { classes, inputRef = () => {}, ref, ...other } = inputProps;
-
-  return (
-      <TextField
-          fullWidth
-          InputProps={{
-            inputRef: node => {
-              ref(node);
-              inputRef(node);
-            },
-            classes: {
-              input: classes.input,
-            },
-          }}
-          {...other}
-      />
-  );
-}
-
-function renderSuggestion(suggestion, { query, isHighlighted }) {
-  const matches = match(suggestion.label, query);
-  const parts = parse(suggestion.label, matches);
-
-  return (
-      <MenuItem selected={isHighlighted} component="div">
-        <div>
-          {parts.map(part => (
-              <span key={part.text} style={{ fontWeight: part.highlight ? 500 : 400 }}>
-    {part.text}
-</span>
-          ))}
-        </div>
-      </MenuItem>
-  );
-}
-
-function getSuggestions(value) {
-  const inputValue = deburr(value.trim()).toLowerCase();
-  const inputLength = inputValue.length;
-  let count = 0;
-
-  return inputLength === 0
-      ? []
-      : suggestions.filter(suggestion => {
-        const keep =
-            count < 5 && suggestion.label.slice(0, inputLength).toLowerCase() === inputValue;
-
-        if (keep) {
-          count += 1;
+        this.state = {
+            developers: []
         }
+    }
 
-        return keep;
-      });
+}
+writeUserData = () => {
+    Firebase.database().ref('/').set(this.state);
+    console.log('DATA SAVED');
 }
 
-function getSuggestionValue(suggestion) {
-  return suggestion.label;
-}
-
-const useStyles = makeStyles(theme => ({
-  root: {
-    height: 250,
-    flexGrow: 1,
-  },
-  container: {
-    position: 'relative',
-  },
-  suggestionsContainerOpen: {
-    position: 'absolute',
-    zIndex: 1,
-    marginTop: theme.spacing(1),
-    left: 0,
-    right: 0,
-  },
-  suggestion: {
-    display: 'block',
-  },
-  suggestionsList: {
-    margin: 0,
-    padding: 0,
-    listStyleType: 'none',
-  },
-  divider: {
-    height: theme.spacing(2),
-  },
-}));
-
-export default function IntegrationAutosuggest() {
-  const classes = useStyles();
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const [state, setState] = React.useState({
-    single: '',
-    popper: '',
-  });
-
-  const [stateSuggestions, setSuggestions] = React.useState([]);
-
-  const handleSuggestionsFetchRequested = ({ value }) => {
-    setSuggestions(getSuggestions(value));
-  };
-
-  const handleSuggestionsClearRequested = () => {
-    setSuggestions([]);
-  };
-
-  const handleChange = name => (event, { newValue }) => {
-    setState({
-      ...state,
-      [name]: newValue,
+getUserData = () => {
+    let ref = Firebase.database().ref('/');
+    ref.on('value', snapshot => {
+        const state = snapshot.val();
+        this.setState(state);
     });
-  };
-
-  const autosuggestProps = {
-    renderInputComponent,
-    suggestions: stateSuggestions,
-    onSuggestionsFetchRequested: handleSuggestionsFetchRequested,
-    onSuggestionsClearRequested: handleSuggestionsClearRequested,
-    getSuggestionValue,
-    renderSuggestion,
-  };
-
-  return (
-      <div className={classes.root}>
-        <Autosuggest
-            {...autosuggestProps}
-            inputProps={{
-              classes,
-              id: 'react-autosuggest-simple',
-              label: 'Country',
-              placeholder: 'Search a country (start with a)',
-              value: state.single,
-              onChange: handleChange('single'),
-            }}
-            theme={{
-              container: classes.container,
-              suggestionsContainerOpen: classes.suggestionsContainerOpen,
-              suggestionsList: classes.suggestionsList,
-              suggestion: classes.suggestion,
-            }}
-            renderSuggestionsContainer={options => (
-                <Paper {...options.containerProps} square>
-                  {options.children}
-                </Paper>
-            )}
-        />
-        <div className={classes.divider} />
-        <Autosuggest
-            {...autosuggestProps}
-            inputProps={{
-              classes,
-              id: 'react-autosuggest-popper',
-              label: 'Country',
-              placeholder: 'With Popper',
-              value: state.popper,
-              onChange: handleChange('popper'),
-              inputRef: node => {
-                setAnchorEl(node);
-              },
-              InputLabelProps: {
-                shrink: true,
-              },
-            }}
-            theme={{
-              suggestionsList: classes.suggestionsList,
-              suggestion: classes.suggestion,
-            }}
-            renderSuggestionsContainer={options => (
-                <Popper anchorEl={anchorEl} open={Boolean(options.children)}>
-                  <Paper
-                      square
-                      {...options.containerProps}
-                      style={{ width: anchorEl ? anchorEl.clientWidth : undefined }}
-                  >
-                    {options.children}
-                  </Paper>
-                </Popper>
-            )}
-        />
-      </div>
-  );
+    console.log('DATA RETRIEVED');
 }
+
+
+function componentDidMount(){
+    this.getUserData();
+};
+
+function componentDidUpdate(prevProps, prevState)  {
+    // check on previous state
+    // only write when it's different with the new state
+    if (prevState !== this.state) {
+        this.writeUserData();
+    }
+}
+
+
+handleSubmit = (event) => {
+    event.preventDefault();
+    let name = this.refs.name.value;
+    let role = this.refs.role.value;
+    let uid = this.refs.uid.value;
+
+    if (uid && name && role){
+        const { developers } = this.state;
+        const devIndex = developers.findIndex(data => {
+            return data.uid === uid
+        });
+        developers[devIndex].name = name;
+        developers[devIndex].role = role;
+        this.setState({ developers });
+    }
+    else if (name && role ) {
+        const uid = new Date().getTime().toString();
+        const { developers } = this.state;
+        developers.push({ uid, name, role })
+        this.setState({ developers });
+    }
+
+    this.refs.name.value = '';
+    this.refs.role.value = '';
+    this.refs.uid.value = '';
+};
+
+removeData = (developer) => {
+    const { developers } = this.state;
+    const newState = developers.filter(data => {
+        return data.uid !== developer.uid;
+    });
+    this.setState({ developers: newState });
+};
+
+updateData = (developer) => {
+    this.refs.uid.value = developer.uid;
+    this.refs.name.value = developer.name;
+    this.refs.role.value = developer.role;
+};
+
+const render = () => {
+    const { developers } = this.state;
+    return(
+        <div className="container">
+            <div className="row">
+                <div className='col-xl-12'>
+                    <h1>Firebase Development Team</h1>
+                </div>
+            </div>
+            <div className='row'>
+                <div className='col-xl-12'>
+                    {
+                        developers
+                            .map(developer =>
+                                <div key={developer.uid} className="card float-left" style={{width: '18rem', marginRight: '1rem'}}>
+                                    <div className="card-body">
+                                        <h5 className="card-title">{ developer.name }</h5>
+                                        <p className="card-text">{ developer.role }</p>
+                                        <button onClick={ () => this.removeData(developer) } className="btn btn-link">Delete</button>
+                                        <button onClick={ () => this.updateData(developer) } className="btn btn-link">Edit</button>
+                                    </div>
+                                </div>
+                            )
+                    }
+                </div>
+            </div>
+            <div className='row'>
+                <div className='col-xl-12'>
+                    <h1>Add new team member here</h1>
+                    <form onSubmit={ this.handleSubmit }>
+                        <div className="form-row">
+                            <input type='hidden' ref='uid' />
+                            <div className="form-group col-md-6">
+                                <label>Name</label>
+                                <input type="text" ref='name' className="form-control" placeholder="Name" />
+                            </div>
+                            <div className="form-group col-md-6">
+                                <label>Role</label>
+                                <input type="text" ref='role' className="form-control" placeholder="Role" />
+                            </div>
+                        </div>
+                        <button type="submit" className="btn btn-primary">Save</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+export default App;
