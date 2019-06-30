@@ -100,7 +100,7 @@ class App extends React.Component {
                             <div className="form-group row">
                                 <label htmlFor="colFormLabelSm" className="col-sm-2 col-form-label col-form-label-sm">Description</label>
                                 <div className="col-sm-6">
-                                    <textarea type="text" ref='role' className="form-control" placeholder="Role" />
+                                    <textarea type="text" ref='description' className="form-control" placeholder="Role" />
                                 </div>
                             </div>
                             <button type="submit" className="btn btn-success">Save</button>
