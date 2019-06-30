@@ -33,3 +33,11 @@ code {
   background-size: cover;
   background-repeat: no-repeat;
 }
+
+h1{
+  color: white;
+}
+
+label {
+  color: #FFF;
+}

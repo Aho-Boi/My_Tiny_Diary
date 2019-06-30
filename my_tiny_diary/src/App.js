@@ -89,18 +89,21 @@ class App extends React.Component {
                     <div className='col-xl-12'>
                         <h1>Add Memory Here</h1>
                         <form onSubmit={this.handleSubmit}>
-                            <div className="form-row">
+                            <div className="form-group row">
                                 <input type='hidden' ref='uid' />
-                                <div className="form-group col-md-6">
-                                    <label>Name</label>
-                                    <input type="text" ref='name' className="form-control" placeholder="Name" />
-                                </div>
-                                <div className="form-group col-md-6">
-                                    <label>Description</label>
-                                    <input type="text" ref='role' className="form-control" placeholder="Role" />
+
+                                <label htmlFor="colFormLabelSm" className="col-sm-2 col-form-label col-form-label-sm">Name</label>
+                                <div className="col-sm-6">
+                                    <input type="text" ref='name' className="form-control form-control-sm" placeholder="Name" />
                                 </div>
                             </div>
-                            <button type="submit" className="btn btn-primary">Save</button>
+                            <div className="form-group row">
+                                <label htmlFor="colFormLabelSm" className="col-sm-2 col-form-label col-form-label-sm">Description</label>
+                                <div className="col-sm-6">
+                                    <textarea type="text" ref='role' className="form-control" placeholder="Role" />
+                                </div>
+                            </div>
+                            <button type="submit" className="btn btn-success">Save</button>
                         </form>
                     </div>
                 </div>
@@ -118,8 +121,8 @@ class App extends React.Component {
                                         <div className="card-body">
                                             <h5 className="card-title">{x.name}</h5>
                                             <p className="card-text">{x.role}</p>
-                                            <button onClick={() => this.removeData(x)} className="btn btn-link">Delete</button>
-                                            <button onClick={() => this.updateData(x)} className="btn btn-link">Edit</button>
+                                            <button onClick={() => this.removeData(x)} className="btn btn-danger">Delete</button>
+                                            <button onClick={() => this.updateData(x)} className="btn btn-primary">Edit</button>
                                         </div>
                                     </div>
                                 )
