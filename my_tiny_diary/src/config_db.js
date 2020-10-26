@@ -2,7 +2,7 @@
 export const DB_CONFIG = {
 
     // Your web app's Firebase configuration
-    apiKey: "AIzaSyDLJRc20jScwu4RTy1W6btKvEXnFtP3iaw",
+    apiKey: "XXXXXXXXXXXXXXXXXXXXXXXXX",
     authDomain: "mytinydiary-5fac6.firebaseapp.com",
     databaseURL: "https://mytinydiary-5fac6.firebaseio.com",
     projectId: "mytinydiary-5fac6",
